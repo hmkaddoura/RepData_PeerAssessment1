@@ -7,20 +7,117 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r}
+First, we will be loading the file content into data DataFrame, and then we will extract only data that has no NA values:
+```{r echo = TRUE}
 data <- read.csv(file="../activity.csv",head=TRUE,sep=",")
+clean_data <- data[complete.cases(data),]
 ```
 
-## What is mean total number of steps taken per day?
 
+## What is mean total number of steps taken per day?
+I will sum the steps value and group it by date. Then, a histogram graph is printed:
+```{r echo = TRUE}
+sum_by_date <- aggregate(clean_data$steps, by=list(date=clean_data$date), FUN=sum)
+hist(sum_by_date$x, col="blue")
+```
+
+this is the Mean by date:
+```{r echo = TRUE}
+mean_by_date <- aggregate(clean_data$steps, by=list(date=clean_data$date), FUN=mean)
+mean_by_date
+```
+
+And this is the Median by Date:
+```{r echo = TRUE}
+median_by_date <- aggregate(clean_data$steps, by=list(date=clean_data$date), FUN=median)
+median_by_date
+```
 
 
 ## What is the average daily activity pattern?
 
+We will create mean for the steps per interval and plot the graph:
+```{r echo = TRUE}
+mean_by_interval <- aggregate(clean_data$steps, by=list(interval=clean_data$interval), FUN=mean)
+plot(mean_by_interval$interval,mean_by_interval$x,type = "l",xlab="5-min Interval",ylab="Averaged Steps all Days")
+```
 
+The time interval that has the maximum number of steps all over the time interval is calculated like this:
+```{r echo = TRUE}
+max_interval <- mean_by_interval[mean_by_interval$x == max(mean_by_interval$x),]
+```
+Hence the The interval is: **`r max_interval$interval`**
 
 ## Imputing missing values
+1. Since I already got the clean data without NA, I just need to calculate the diffirence between the number of rows as follows:
+
+```{r echo = TRUE}
+nrow(data)- nrow(clean_data)
+```
+
+2. To fill the data set, I will fill the NA data with the mean for that time interval.
+
+```{r echo = TRUE}
+na_data = data[is.na(data),]
+for(i in 1:nrow(na_data))
+{
+        na_data[i,"steps"] = mean_by_interval[mean_by_interval$interval == na_data[i,"interval"],]$x
+}
+```
+
+After filling the na_data, we will be having 2 data frames na data frame and non-na data frame (which we called it clean_data) 
+
+3. To create the new data set, we will be appending na_data to clean_data using the below code:
+```{r echo = TRUE}
+new_data <- rbind(na_data, clean_data)
+head(new_data)
+```
+
+4. Lets check out the new data how it will look like and how it will differ in terms of mean and median:
+```{r echo = TRUE}
+sum_by_date_new <- aggregate(new_data$steps, by=list(date=new_data$date), FUN=sum)
+hist(sum_by_date_new$x, col="blue")
+```
+
+this is the Mean by date:
+```{r echo = TRUE}
+mean_by_date_new <- aggregate(new_data$steps, by=list(date=new_data$date), FUN=mean)
+mean_by_date_new
+```
+
+And this is the Median by Date:
+```{r echo = TRUE}
+median_by_date_new <- aggregate(new_data$steps, by=list(date=new_data$date), FUN=median)
+median_by_date_new
+```
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1. We will create a new valiable called day_type which has weekend or weekday values:
+```{r echo = TRUE}
+for(i in 1:nrow(new_data))
+{
+        if(!(weekdays(as.Date(new_data[i,]$date)) %in% c('Saturday','Sunday')))
+        {
+                type <- "weekday"
+        }
+        else
+        {
+                type <- "weekend"
+        }
+        new_data[i,"day_type"] = type
+}
+
+```
+
+2. We need to group the new_data by day_type and interval and then plot the result:
+```{r echo = TRUE}
+mean_by_day_type_interval <- aggregate(new_data$steps, by=list(interval=new_data$interval,day_type=new_data$day_type), FUN=mean)
+
+library(ggplot2)
+g <- ggplot(mean_by_day_type_interval, aes(interval,  x))
+g + geom_line() +  facet_grid(day_type ~ .) + ggtitle("Avg. Steps per day interval for Weekend and Weekday")
+
+```
