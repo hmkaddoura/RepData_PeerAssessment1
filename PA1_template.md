@@ -1,21 +1,30 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ## Loading and preprocessing the data
+First, we will be loading the file content into data DataFrame, and then we will extract only data that has no NA values:
 
 ```r
-data <- read.csv(file="../activity.csv",head=TRUE,sep=",")
+unzip(zipfile = "activity.zip")
+data <- read.csv(file="activity.csv",head=TRUE,sep=",")
 clean_data <- data[complete.cases(data),]
 ```
 
+
 ## What is mean total number of steps taken per day?
+I will sum the steps value and group it by date. Then, a histogram graph is printed:
 
 ```r
 sum_by_date <- aggregate(clean_data$steps, by=list(date=clean_data$date), FUN=sum)
 hist(sum_by_date$x, col="blue")
 ```
 
-![plot of chunk unnamed-chunk-2](./PA1_template_files/figure-html/unnamed-chunk-2.png) 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 this is the Mean by date:
 
@@ -144,6 +153,8 @@ median_by_date
 ## 52 2012-11-28 0
 ## 53 2012-11-29 0
 ```
+
+
 ## What is the average daily activity pattern?
 
 We will create mean for the steps per interval and plot the graph:
@@ -153,7 +164,7 @@ mean_by_interval <- aggregate(clean_data$steps, by=list(interval=clean_data$inte
 plot(mean_by_interval$interval,mean_by_interval$x,type = "l",xlab="5-min Interval",ylab="Averaged Steps all Days")
 ```
 
-![plot of chunk unnamed-chunk-5](./PA1_template_files/figure-html/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 The time interval that has the maximum number of steps all over the time interval is calculated like this:
 
@@ -211,7 +222,7 @@ sum_by_date_new <- aggregate(new_data$steps, by=list(date=new_data$date), FUN=su
 hist(sum_by_date_new$x, col="blue")
 ```
 
-![plot of chunk unnamed-chunk-10](./PA1_template_files/figure-html/unnamed-chunk-10.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
 
 this is the Mean by date:
 
@@ -388,4 +399,4 @@ g <- ggplot(mean_by_day_type_interval, aes(interval,  x))
 g + geom_line() +  facet_grid(day_type ~ .) + ggtitle("Avg. Steps per day interval for Weekend and Weekday")
 ```
 
-![plot of chunk unnamed-chunk-14](./PA1_template_files/figure-html/unnamed-chunk-14.png) 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14.png) 

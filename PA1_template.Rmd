@@ -9,7 +9,8 @@ output:
 ## Loading and preprocessing the data
 First, we will be loading the file content into data DataFrame, and then we will extract only data that has no NA values:
 ```{r echo = TRUE}
-data <- read.csv(file="../activity.csv",head=TRUE,sep=",")
+unzip(zipfile = "activity.zip")
+data <- read.csv(file="activity.csv",head=TRUE,sep=",")
 clean_data <- data[complete.cases(data),]
 ```
 
